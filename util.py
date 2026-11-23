@@ -1,4 +1,7 @@
 def print_matrix(matrix):
+    '''
+    행렬을 포맷에 맞게 출력하는 함수
+    '''
     for row in matrix:
         print(" ".join(f"{x:6.1f}" for x in row))
     print()

@@ -11,7 +11,7 @@ HOW? -> 일단 DP와 백트레이싱.
 자세한건 공유한 영상 봐주세요. 글로설명하는거보다 바로 이해가 됩니다.
 
 
-@psudo code
+@pseudo code
 int DTWDistance(s: array [1..n], t: array [1..m]) {
     DTW := array [0..n, 0..m]
     
@@ -23,9 +23,9 @@ int DTWDistance(s: array [1..n], t: array [1..m]) {
     for i := 1 to n
         for j := 1 to m
             cost := d(s[i], t[j])
-            DTW[i, j] := cost + minimum(DTW[i-1, j  ],    // insertion
-                                        DTW[i  , j-1],    // deletion
-                                        DTW[i-1, j-1])    // match
+            DTW[i, j] := cost + minimum(DTW[i-1, j  ],    
+                                        DTW[i  , j-1],    
+                                        DTW[i-1, j-1])    
     return DTW[n, m]
 }
 '''
@@ -39,22 +39,27 @@ def backtracing():
 
 def DTWdist(s,t):
     dtw = []
-    #dtw 배열 초기화요
+    # dtw 배열 초기화: 크기는 (len(s) + 1) x (len(t) + 1)
+    # 0번 행과 0번 열은 경계 조건 처리(i-1, j-1 참조 및 시작점 고정)를 위한 inf 패딩 영역
     for i in range(len(s)+1):
         dtw.append([])
         for j in range(len(t)+1):
             dtw[i].append(float('inf'))
+    # (0, 0)만 0으로 설정하여 (1, 1)의 누적 비용이 dtw[1][1] 자체 거리값에서 시작되도록 함
     dtw[0][0] = 0
     print("--- 초기화된 거리행렬 ---")
     print_matrix(dtw)
-    #거리 행렬 만들고요
+
+    # 거리 행렬 만들기 (패딩인 0번 행/열은 건너뛰고 1..len 범위만 채움)
+    # dtw는 1-based(패딩 포함), s/t는 0-based이므로 s[i-1], t[j-1]로 접근
     for i in range(1,len(s)+1):
         for j in range(1,len(t)+1):
             dtw[i][j] = abs(s[i-1] - t[j-1])
     print("--- 실제 거리행렬 ---")
     print_matrix(dtw)
 
-    #누적 비용 행렬 만들기
+    # 누적 비용 행렬 만들기 (현재 거리 + 인접 3방향 누적 비용의 최솟값)
+    # dtw[i-1][j]: 위(insertion), dtw[i][j-1]: 왼쪽(deletion), dtw[i-1][j-1]: 대각선 왼쪽 위(match)
     for i in range(1,len(s)+1):
         for j in range(1,len(t)+1):
             dtw[i][j] = dtw[i][j] + min(dtw[i-1][j],dtw[i][j-1],dtw[i-1][j-1])    
