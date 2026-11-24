@@ -33,11 +33,48 @@ int DTWDistance(s: array [1..n], t: array [1..m]) {
 import sys
 from util import print_matrix
 
-def backtracing():
-    # TODO : 구현2 : 완성된 DTW행렬을 받아 백트레이싱하여 데이터 매핑정보 출력
-    pass
+def backtracing(dtw, s, t, verbose=True):
+    # 구현2 : 누적비용행렬 오른쪽 아래 (n,m)에서 시작해서 (1,1)까지 거꾸로 따라감
+    # 대각선, 위, 왼쪽 중에 제일 작은 칸으로 이동 (값이 같으면 대각선 먼저)
+    # 0번 행/열이 inf라서 끝에 닿으면 알아서 벽 타고 (1,1)로 감
+    i, j = len(s), len(t)
+    path = [(i-1, j-1)]  # s, t 인덱스로 저장 (0부터)
+    while i > 1 or j > 1:
+        diag = dtw[i-1][j-1]
+        up = dtw[i-1][j]
+        left = dtw[i][j-1]
+        if diag <= up and diag <= left:
+            i, j = i-1, j-1
+        elif up <= left:
+            i = i-1
+        else:
+            j = j-1
+        path.append((i-1, j-1))
+    path.reverse()  # 뒤에서부터 넣었으니까 뒤집어줌
 
-def DTWdist(s,t):
+    if verbose:
+        print("--- 백트레이싱 경로 ---")
+        # 경로에 있는 칸은 [ ]로 표시
+        on_path = set(path)
+        for r in range(len(s)):
+            line = []
+            for c in range(len(t)):
+                if (r, c) in on_path:
+                    line.append(f"[{dtw[r+1][c+1]:5.1f}]")
+                else:
+                    line.append(f" {dtw[r+1][c+1]:5.1f} ")
+            print(" ".join(line))
+        print()
+        print("--- 매핑 결과 ---")
+        for a, b in path:
+            print(f"s[{a}]={s[a]:g}  <->  t[{b}]={t[b]:g}")
+        print("경로 길이 :", len(path))
+        print()
+
+    return path
+
+def DTWdist(s,t, verbose=True):
+    # verbose=False면 행렬 출력 안함 (실행시간 잴 때 출력하는 시간까지 같이 재지는거 막으려고 추가)
     dtw = []
     # dtw 배열 초기화: 크기는 (len(s) + 1) x (len(t) + 1)
     # 0번 행과 0번 열은 경계 조건 처리(i-1, j-1 참조 및 시작점 고정)를 위한 inf 패딩 영역
@@ -47,24 +84,27 @@ def DTWdist(s,t):
             dtw[i].append(float('inf'))
     # (0, 0)만 0으로 설정하여 (1, 1)의 누적 비용이 dtw[1][1] 자체 거리값에서 시작되도록 함
     dtw[0][0] = 0
-    print("--- 초기화된 거리행렬 ---")
-    print_matrix(dtw)
+    if verbose:
+        print("--- 초기화된 거리행렬 ---")
+        print_matrix(dtw)
 
     # 거리 행렬 만들기 (패딩인 0번 행/열은 건너뛰고 1..len 범위만 채움)
     # dtw는 1-based(패딩 포함), s/t는 0-based이므로 s[i-1], t[j-1]로 접근
     for i in range(1,len(s)+1):
         for j in range(1,len(t)+1):
             dtw[i][j] = abs(s[i-1] - t[j-1])
-    print("--- 실제 거리행렬 ---")
-    print_matrix(dtw)
+    if verbose:
+        print("--- 실제 거리행렬 ---")
+        print_matrix(dtw)
 
     # 누적 비용 행렬 만들기 (현재 거리 + 인접 3방향 누적 비용의 최솟값)
     # dtw[i-1][j]: 위(insertion), dtw[i][j-1]: 왼쪽(deletion), dtw[i-1][j-1]: 대각선 왼쪽 위(match)
     for i in range(1,len(s)+1):
         for j in range(1,len(t)+1):
             dtw[i][j] = dtw[i][j] + min(dtw[i-1][j],dtw[i][j-1],dtw[i-1][j-1])    
-    print("--- 누적 비용 행렬 ---")
-    print_matrix(dtw)
+    if verbose:
+        print("--- 누적 비용 행렬 ---")
+        print_matrix(dtw)
 
     return dtw
 
@@ -88,6 +128,10 @@ if __name__ == "__main__":
 
     #누적거리행렬의 끝값(오른쪽밑)이 곧 최종거리이며 0에 가까울수로 유사한것.
     print(dtw[-1][-1])
+    print()
+
+    #백트레이싱 (구현2)
+    path = backtracing(dtw, s, t)
 
     
         
