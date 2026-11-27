@@ -31,7 +31,7 @@ int DTWDistance(s: array [1..n], t: array [1..m]) {
 '''
 
 import sys
-from util import print_matrix
+from util import print_matrix, print_plot
 
 def backtracing(dtw, s, t, verbose=True):
     # 구현2 : 누적비용행렬 오른쪽 아래 (n,m)에서 시작해서 (1,1)까지 거꾸로 따라감
@@ -132,6 +132,7 @@ if __name__ == "__main__":
 
     #백트레이싱 (구현2)
     path = backtracing(dtw, s, t)
+    print_plot(s, t, dtw, path, title=f"{file1} vs {file2}", save_path="results/plot.png")
 
     
         
